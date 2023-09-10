@@ -1,33 +1,35 @@
 <template>
   <Form @onSubmit="handleSubmit" />
-  <List @onRemove="handleRemove" :items="notes" />
+  <List @onRemove="handleRemove" :items="getNotesFromState" />
 </template>
 
 <script>
 import Form from "@/components/Notes/Form";
 import List from "@/components/Notes/List";
+import getNotesFromStorage from "@/utils/storage.js";
 
 export default {
   components: { Form, List },
   data() {
     return {
-      notes: [
-        {
-          title: "Learn Vue 3",
-          tags: ["work"],
-        },
-        {
-          title: "Finish course",
-          tags: ["work", "home"],
-        },
-      ],
+      // notes: [
+      //   {
+      //     title: "Learn Vue 3",
+      //     tags: ["work"],
+      //   },
+      //   {
+      //     title: "Finish course",
+      //     tags: ["work", "home"],
+      //   },
+      // ],
     };
   },
   mounted() {
-    this.getNotes();
+    // this.getNotes();
+    getNotesFromStorage('notes', this.$store, 'setNotes');
   },
   watch: {
-    notes: {
+    getNotesFromState: {
       handler(updatedList) {
         localStorage.setItem("notes", JSON.stringify(updatedList));
       },
@@ -36,23 +38,32 @@ export default {
   },
   methods: {
     // * get / set notes
-    getNotes() {
-      const localNotes = localStorage.getItem("notes");
-      if (localNotes) {
-        this.notes = JSON.parse(localNotes);
-      }
-    },
+    // getNotes() {
+    //   const localNotes = localStorage.getItem("notes");
+    //   if (localNotes) {
+    //     // this.notes = JSON.parse(localNotes);
+    //     this.$store.dispatch("setNotes", JSON.parse(localNotes));
+    //   }
+    // },
+
     // * submit note
     handleSubmit({title, tags}) {
       const note = {
         title: title,
         tags: tags,
       };
-      this.notes.push(note);
+      this.$store.dispatch("setNote", note);
     },
+
     // * remove note
     handleRemove(index) {
-      this.notes.splice(index, 1);
+      this.$store.dispatch("removeNote", index);
+    },
+  },
+
+  computed: {
+    getNotesFromState() {
+      return this.$store.getters.getNotesFromState;
     },
   },
 };
